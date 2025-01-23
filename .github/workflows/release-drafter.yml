@@ -30,33 +30,9 @@ jobs:
           apply-changes: true
           pull-request-number: ${{ github.event.pull_request.number }}
           maintain-labels-not-matched: false
-          
+
       # Step 3: Debugging information (optional)
       - name: Debug information
         run: |
           echo "Current branch: $GITHUB_REF"
           git status
-
-  handle-merged-pr:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged == true }}
-    needs: assign-labels
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Handle Merged PR
-        run: echo "The pull request was merged and processed."
-
-  # Step 4: Draft the release notes (Release Drafter)
-  release-drafter:
-    runs-on: ubuntu-latest
-    needs: [assign-labels, handle-merged-pr] # Ensure this runs after labeling and merged PR handling
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Release Drafter
-        uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
