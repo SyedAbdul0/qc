@@ -36,3 +36,6 @@ jobs:
         run: |
           echo "Current branch: $GITHUB_REF"
           git status
+      # Step 4: Draft the release notes
+      - name: Set up Release Drafter
+        uses: release-drafter/release-drafter@v6
