@@ -1,26 +1,18 @@
-name: Release Drafter with Auto-Labeling
+name: Assign Labels Based on Conventional Commits
 
 on:
-  push:
-    branches:
-      - main  # Update to your default branch name
-      - staging
   pull_request:
-    types: [opened, reopened, synchronize]
-
-permissions:
-  contents: write
-  pull-requests: write
+    types: [opened, edited, closed]
 
 jobs:
-  auto_label_and_draft_release:
+  assign-labels:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == false || github.event.pull_request.merged == null }}
+
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Auto-label pull requests based on commit messages
       - name: Assign Labels
         uses: mauroalderete/action-assign-labels@v1
         with:
@@ -36,15 +28,11 @@ jobs:
               nouns: ['chore']
               labels: ['🧰 Maintenance']
           apply-changes: true
+          pull-request-number: ${{ github.event.pull_request.number }}
+          maintain-labels-not-matched: false
 
       # Step 3: Debugging information (optional)
       - name: Debug information
         run: |
           echo "Current branch: $GITHUB_REF"
           git status
-
-      # Step 4: Draft the release notes
-      - name: Set up Release Drafter
-        uses: release-drafter/release-drafter@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
