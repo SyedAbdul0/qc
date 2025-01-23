@@ -1,41 +1,31 @@
-name: Assign Labels Based on Conventional Commits
+name: Release Drafter
 
 on:
+  push:
+    branches:
+      - main  # Change 'master' to 'main' if necessary
+      - staging
   pull_request:
-    types: [opened, edited, closed]
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
 
 jobs:
-  assign-labels:
+  update_release_draft:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged == false || github.event.pull_request.merged == null }}
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Assign Labels
-        uses: mauroalderete/action-assign-labels@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          conventional-commits: |
-            - type: 'fix'
-              nouns: ['fix', 'bugfix', 'bug']
-              labels: ['🐛 Bug Fixes']
-            - type: 'feat'
-              nouns: ['feature', 'enhancement']
-              labels: ['🚀 Features']
-            - type: 'chore'
-              nouns: ['chore']
-              labels: ['🧰 Maintenance']
-          apply-changes: true
-          pull-request-number: ${{ github.event.pull_request.number }}
-          maintain-labels-not-matched: false
-
-      # Step 3: Debugging information (optional)
       - name: Debug information
         run: |
           echo "Current branch: $GITHUB_REF"
           git status
-      # Step 4: Draft the release notes
       - name: Set up Release Drafter
         uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
