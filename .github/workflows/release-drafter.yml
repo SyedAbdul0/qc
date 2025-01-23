@@ -1,0 +1,50 @@
+name: Release Drafter with Auto-Labeling
+
+on:
+  push:
+    branches:
+      - main  # Update to your default branch name
+      - staging
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto_label_and_draft_release:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Auto-label pull requests based on commit messages
+      - name: Assign Labels
+        uses: mauroalderete/action-assign-labels@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          conventional-commits: |
+            - type: 'fix'
+              nouns: ['fix', 'bugfix', 'bug']
+              labels: ['🐛 Bug Fixes']
+            - type: 'feat'
+              nouns: ['feature', 'enhancement']
+              labels: ['🚀 Features']
+            - type: 'chore'
+              nouns: ['chore']
+              labels: ['🧰 Maintenance']
+          apply-changes: true
+
+      # Step 3: Debugging information (optional)
+      - name: Debug information
+        run: |
+          echo "Current branch: $GITHUB_REF"
+          git status
+
+      # Step 4: Draft the release notes
+      - name: Set up Release Drafter
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
